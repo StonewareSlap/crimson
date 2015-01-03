@@ -30,6 +30,12 @@ public class Surface : MonoBehaviour
     // ------------------------------------------------------------------------   
     public void Initialize()
     {
+        InitializeCommon();
+    }
+
+    // ------------------------------------------------------------------------
+    private void InitializeCommon()
+    {
         m_Surface = collider2D as PolygonCollider2D;
         m_Surface.isTrigger = true;
     }
