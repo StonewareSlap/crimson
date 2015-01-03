@@ -8,73 +8,78 @@ namespace Terrain {
 [CustomEditor(typeof(Surface))]
 public class SurfaceEditor : Editor
 {
-    private SerializedObject m_object;
-    private SerializedProperty m_horizontalDirection;
-    private SerializedProperty m_verticalDirection;
-    private SerializedProperty m_edgeMetadatas;
+    private SerializedObject m_Object;
+    private SerializedProperty m_HorizontalDirection;
+    private SerializedProperty m_VerticalDirection;
+    private SerializedProperty m_SurfaceEdges;
 
     // ------------------------------------------------------------------------
     public void OnEnable()
     {
-        m_object = new SerializedObject(target);
+        var surface = target as Surface;
+        surface.Initialize();
 
-        m_horizontalDirection = m_object.FindProperty("m_HorizontalDirection");
-        m_verticalDirection = m_object.FindProperty("m_VerticalDirection");
-        m_edgeMetadatas = m_object.FindProperty("m_edgeMetadata.Array");
+        m_Object = new SerializedObject(target);
+
+        m_HorizontalDirection = m_Object.FindProperty("m_HorizontalDirection");
+        m_VerticalDirection = m_Object.FindProperty("m_VerticalDirection");
+        m_SurfaceEdges = m_Object.FindProperty("m_SurfaceEdges.Array");
     }
 
     // ------------------------------------------------------------------------
     public override void OnInspectorGUI()
     {
-        m_object.Update();
+        m_Object.Update();
+
+        GUILayout.Label("TERRAIN\n----------", EditorStyles.boldLabel);
 
         GUILayout.Label("Direction", EditorStyles.boldLabel);
 
-        EditorGUILayout.PropertyField(m_horizontalDirection);
-        EditorGUILayout.PropertyField(m_verticalDirection);
+        EditorGUILayout.PropertyField(m_HorizontalDirection);
+        EditorGUILayout.PropertyField(m_VerticalDirection);
 
-        //var edgeMetadatas = GetEdgeMetadataArray();
-        //if (edgeMetadatas != null)
-        //{
-        //    for (int i = 0; i < edgeMetadatas.Length; ++i)
-        //    {
-        //        var result = EditorGUILayout.ObjectField(edgeMetadatas[i], typeof(WalkableSurface.EdgeMetadata), true);
-        //    }
-        //}
+        GUILayout.Label("Edges", EditorStyles.boldLabel);
 
-        m_object.ApplyModifiedProperties();
+        var surface = target as Surface;
+        if (surface != null)
+        {
+            // Make sure the array match the surface edge count.
+            var size = m_SurfaceEdges.arraySize;
+            if (size != surface.EdgeCount)
+            {                
+                while (surface.EdgeCount > m_SurfaceEdges.arraySize)
+                {
+                    m_SurfaceEdges.InsertArrayElementAtIndex(m_SurfaceEdges.arraySize);
+                }
+
+                while (surface.EdgeCount < m_SurfaceEdges.arraySize)
+                {
+                    m_SurfaceEdges.DeleteArrayElementAtIndex(m_SurfaceEdges.arraySize - 1);
+                }               
+            }
+
+            for (int i = 0; i < m_SurfaceEdges.arraySize; ++i)
+            {
+                SerializedProperty element = m_SurfaceEdges.GetArrayElementAtIndex(i);
+                
+                var type = element.FindPropertyRelative("m_Type");
+                EditorGUILayout.PropertyField(type);
+            }
+        }
+
+        m_Object.ApplyModifiedProperties();
     }
 
     // ------------------------------------------------------------------------
     private void OnSceneGUI()
     {
-        var walkableSurface = target as Surface;
-
-        // Display the surface's direction.
-        Handles.color = Color.green;
-        Handles.DrawLine(walkableSurface.transform.position, walkableSurface.transform.position + (Vector3)m_horizontalDirection.vector2Value.normalized * 3.0f);
-        Handles.color = Color.blue;
-        Handles.DrawLine(walkableSurface.transform.position, walkableSurface.transform.position + (Vector3)m_verticalDirection.vector2Value.normalized * 3.0f);
-
-        // Display the surface's edges.
-        //walkableSurface.OnSceneGUI();
+        // Display the surface informations.
+        var surface = target as Surface;
+        if (surface != null)
+        {
+            surface.OnSceneGUI();
+        }
     }
-
-    // ------------------------------------------------------------------------
-    //private WalkableSurface.EdgeMetadata[] GetEdgeMetadataArray()
-    //{
-    //    var size = m_object.FindProperty("m_edgeMetadata.Array.size").intValue;
-    //    var edgeMetadatas = new WalkableSurface.EdgeMetadata[size];
-
-    //    for (int i = 0; i < size; ++i)
-    //    {
-    //        edgeMetadatas[i] = (m_object.FindProperty(string.Format("m_edgeMetadata.Array.data[{0}]", i)).objectReferenceValue) as WalkableSurface.EdgeMetadata;
-    //    }
-
-    //    return edgeMetadatas;
-
-    //    return null;
-    //}
 }
 
 } // namespace Terrain
