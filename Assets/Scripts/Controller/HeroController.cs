@@ -15,9 +15,10 @@ public class HeroController : MonoBehaviour {
     }
     private int m_inputDirection;
     public  Vector2 m_direction;
-    private Vector2 m_nextPosition;
-
     private SortedList m_walkableSurfaces = new SortedList();
+
+    private Terrain.Navigation.Input m_TerrainNavInput = new Terrain.Navigation.Input();
+    private Terrain.Navigation.Output m_TerrainNavOutput = new Terrain.Navigation.Output();
 
 	void Start() 
     {	        
@@ -45,12 +46,17 @@ public class HeroController : MonoBehaviour {
         if (m_walkableSurfaces.Count > 0)
         {
             // The most recently added walkable surface is the one we consider.
-            GameObject walkableSurfaceObject = m_walkableSurfaces.GetByIndex(m_walkableSurfaces.Count - 1) as GameObject;
+            var walkableSurfaceObject = m_walkableSurfaces.GetByIndex(m_walkableSurfaces.Count - 1) as GameObject;
             var walkableSurface = walkableSurfaceObject != null ? walkableSurfaceObject.GetComponent<Terrain.Surface>() : null;
             if (walkableSurface)
             {
-                //Vector2 velocity = walkableSurface.ComputeVelocity(this);
-                //rigidbody2D.velocity = velocity;
+                m_TerrainNavInput.m_Origin = rigidbody2D.position;
+                m_TerrainNavInput.m_Velocity = m_direction.normalized * m_speed;
+                m_TerrainNavInput.m_Height = 0.0f;
+
+                walkableSurface.Navigation(m_TerrainNavInput, m_TerrainNavOutput);
+
+                rigidbody2D.velocity = m_TerrainNavOutput.m_Velocity;
             }
         }
     }

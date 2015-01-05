@@ -71,7 +71,7 @@ public class SurfaceEditor : Editor
     }
 
     // ------------------------------------------------------------------------
-    private void OnSceneGUI()
+    public void OnSceneGUI()
     {
         // Display the surface informations.
         var surface = target as Surface;
