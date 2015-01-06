@@ -49,9 +49,12 @@ public class SurfaceEdge
                 Jump(input, output);
                 break;
             }
+            default:
+            {
+                output.m_Velocity = Vector2.zero;
+                break;
+            }
         }
-
-        output.m_Velocity = Vector2.zero;
     }
 
     private void Block(Navigation.Input input, Navigation.Output output)
