@@ -17,16 +17,27 @@ public class ControllerBase : MonoBehaviour
     }
     private int m_InputDirection;
     private Vector2 m_Direction;
-
+    private Vector2 m_DirectionFactor = new Vector2(1.0f, 0.75f);
+    private bool m_bJumpRequest = false;
+    
     // Properties
-    private float m_Speed = 5.0f;
+    public float m_MaxVelocity = 4.5f;
+    public float m_GravityFactor = 3.0f;
+   
+    private float m_VerticalVelocity = 0.0f;
     private float m_Height = 0.0f;
+
+    // Collisions
+    public CircleCollider2D m_NavigationCollider;
+    private int m_EdgeLayerMask;
 
     // Terrain
     public Terrain.TerrainSurface m_DefaultTerrainSurface;
     private SortedList m_TerrainSurfaces = new SortedList();
     private Terrain.TerrainJump m_TerrainJump;
     private Collision2D m_TerrainJumpCollision;
+
+    // Terrain Navigation
     private Terrain.TerrainNavigationInput m_TerrainNavInput = new Terrain.TerrainNavigationInput();
     private Terrain.TerrainNavigationOutput m_TerrainNavOutput = new Terrain.TerrainNavigationOutput();
 
@@ -39,12 +50,17 @@ public class ControllerBase : MonoBehaviour
     // ------------------------------------------------------------------------   
     public void Initialize()
     {
+        // Add the default TerrainSurface. This surface is used when the controller is not standing on another one.
         m_TerrainSurfaces.Add(-1, m_DefaultTerrainSurface.gameObject.GetComponent<Terrain.TerrainSurface>());
+
+        // Cache the collision LayerMask.
+        m_EdgeLayerMask = LayerMask.GetMask("TerrainEdge");
     }
 
     // ------------------------------------------------------------------------   
     void Update()
     {
+        // Direction request
         m_InputDirection = 0;
         if (Input.GetKey(KeyCode.UpArrow)) m_InputDirection |= (int)EDirection.Up;
         if (Input.GetKey(KeyCode.DownArrow)) m_InputDirection |= (int)EDirection.Down;
@@ -56,21 +72,48 @@ public class ControllerBase : MonoBehaviour
         if ((m_InputDirection & (int)EDirection.Down) == 0) { m_Direction.y += 1.0f; }
         if ((m_InputDirection & (int)EDirection.Left) == 0) { m_Direction.x += 1.0f; }
         if ((m_InputDirection & (int)EDirection.Right) == 0) { m_Direction.x -= 1.0f; }
+        m_Direction = m_Direction.normalized;
+        m_Direction.x *= m_DirectionFactor.x;
+        m_Direction.y *= m_DirectionFactor.y;
+
+        // Jump request
+        m_bJumpRequest = Input.GetKeyDown(KeyCode.Space);
+        if (m_bJumpRequest && m_Height < float.Epsilon)
+        {
+            m_VerticalVelocity = 12.5f;
+        }
+
+        // Height update
+        m_Height += m_VerticalVelocity * Time.deltaTime;
+        if (m_Height < float.Epsilon)
+        {
+            m_Height = m_VerticalVelocity = 0.0f;
+        }
+
+        // ...
+        var components = GetComponentsInChildren<Transform>();
+        foreach (var comp in components)
+        {
+            if (comp != transform)
+            {
+                comp.position = transform.position + Vector3.up * m_Height;
+            }
+        }
     }
 
     // ------------------------------------------------------------------------   
     private void FixedUpdate()
     {
-        rigidbody2D.velocity = Vector2.zero;
-
-        m_TerrainNavInput.m_Origin = rigidbody2D.position;
-        m_TerrainNavInput.m_Velocity = m_Direction.normalized * m_Speed;
-        m_TerrainNavInput.m_Height = m_Height;
+        // Initialize the navigation structs.
+        m_TerrainNavInput.m_Origin = m_TerrainNavOutput.m_Origin = rigidbody2D.position;
+        m_TerrainNavInput.m_Velocity = m_TerrainNavOutput.m_Velocity = m_Direction * m_MaxVelocity;
+        m_TerrainNavInput.m_Height = m_TerrainNavOutput.m_Height = m_Height;
+        m_TerrainNavInput.m_Radius = m_NavigationCollider.radius;
 
         // Terrain Surface
         if (m_TerrainSurfaces.Count > 0)
         {
-            // The most recently added walkable surface is the one we consider.
+            // We consider the most recently added TerrainSurface.
             var terrainSurface = m_TerrainSurfaces.GetByIndex(m_TerrainSurfaces.Count - 1) as Terrain.TerrainSurface;
             if (terrainSurface != null)
             {
@@ -79,7 +122,7 @@ public class ControllerBase : MonoBehaviour
         }
         else
         {
-            Debug.LogError("ControllerBase.FixedUpdate : m_TerrainSurfaces is empty. Make sure you have defined the default surface.");
+            Debug.LogError("ControllerBase.FixedUpdate : m_TerrainSurfaces is empty. Make sure you have assigned m_DefaultTerrainSurface.");
         }
 
         // Terrain Jump
@@ -89,49 +132,59 @@ public class ControllerBase : MonoBehaviour
             m_TerrainNavInput.m_Height = m_TerrainNavOutput.m_Height;
             m_TerrainNavInput.m_Collision = m_TerrainJumpCollision;
 
-            m_TerrainJump.Navigation(m_TerrainNavInput, m_TerrainNavOutput);            
+            m_TerrainJump.Navigation(m_TerrainNavInput, m_TerrainNavOutput);
+
+            // Prevent the jump if the destination is not collision free (expect for the current jump one).
+            var hits = Physics2D.OverlapCircleAll(m_TerrainNavOutput.m_Origin, m_NavigationCollider.radius, m_EdgeLayerMask);            
+            foreach (var hit in hits)
+            {
+                if (hit == m_TerrainJump.m_TopEdge || hit == m_TerrainJump.m_BottomEdge)
+                {
+                    continue;
+                }
+                
+                m_TerrainNavOutput.m_Height = m_TerrainNavInput.m_Height;
+                m_TerrainNavOutput.m_Origin = m_TerrainNavInput.m_Origin;
+            }
+
+            // Release the references since the TerrainJump was handled.
             m_TerrainJump = null;
             m_TerrainJumpCollision = null;
-            
-            rigidbody2D.position = m_TerrainNavOutput.m_Origin;
+            m_TerrainNavInput.m_Collision = null;
         }
 
-        // Height
-        m_Height = m_TerrainNavOutput.m_Height - Physics2D.gravity.magnitude * Time.fixedDeltaTime;
-        if (m_Height < float.Epsilon)
-        {
-            m_Height = 0.0f;
-        }
+        // Gravity
+        m_VerticalVelocity -= Physics2D.gravity.magnitude * m_GravityFactor * Time.fixedDeltaTime;
 
+        // Final Values
+        rigidbody2D.position = m_TerrainNavOutput.m_Origin;
         rigidbody2D.velocity = m_TerrainNavOutput.m_Velocity;
+        m_Height = m_TerrainNavOutput.m_Height;
     }
 
     // ------------------------------------------------------------------------   
-    void OnTriggerEnter2D(Collider2D other)
+    void CheckForTerrainSurface(Collider2D other, bool bAdd)
     {
         var terrainSurface = other.gameObject.GetComponent<Terrain.TerrainSurface>();
         if (terrainSurface != null)
         {
-            m_TerrainSurfaces.Add(Time.frameCount, terrainSurface);
+            if (bAdd)
+            {
+                m_TerrainSurfaces.Add(Time.frameCount, terrainSurface);          
+            }
+            else
+            {
+                var index = m_TerrainSurfaces.IndexOfValue(terrainSurface);
+                if (index >= 0)
+                {
+                    m_TerrainSurfaces.RemoveAt(index);
+                }
+            }
         }
     }
 
     // ------------------------------------------------------------------------   
-    void OnTriggerExit2D(Collider2D other)
-    {
-        var terrainSurface = other.gameObject.GetComponent<Terrain.TerrainSurface>();
-        if (terrainSurface != null)
-        {
-            int index = m_TerrainSurfaces.IndexOfValue(terrainSurface);
-            if (index >= 0)
-            {
-                m_TerrainSurfaces.RemoveAt(index);
-            }
-        }        
-    }
-
-    // ------------------------------------------------------------------------   
-    void OnCollisionEnter2D(Collision2D collision)
+    void CheckForTerrainJump(Collision2D collision)
     {
         var terrainJump = collision.gameObject.GetComponent<Terrain.TerrainJump>();
         if (terrainJump != null)
@@ -139,6 +192,30 @@ public class ControllerBase : MonoBehaviour
             m_TerrainJump = terrainJump;
             m_TerrainJumpCollision = collision;
         }
+    }
+
+    // ------------------------------------------------------------------------   
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        CheckForTerrainSurface(other, true);
+    }
+
+    // ------------------------------------------------------------------------   
+    void OnTriggerExit2D(Collider2D other)
+    {
+        CheckForTerrainSurface(other, false);
+    }
+
+    // ------------------------------------------------------------------------   
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        CheckForTerrainJump(collision);
+    }
+
+    // ------------------------------------------------------------------------   
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        CheckForTerrainJump(collision);
     }
 }
 
