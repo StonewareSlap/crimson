@@ -30,6 +30,7 @@ public class TerrainEdge : MonoBehaviour
     }
 
     // ------------------------------------------------------------------------
+#if UNITY_EDITOR
     public void OnSceneGUI()
     {
         // Display the edge.
@@ -50,6 +51,7 @@ public class TerrainEdge : MonoBehaviour
             }
         }
     }
+#endif
 }
 
 } // namespace Edge

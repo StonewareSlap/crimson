@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,6 +16,9 @@ public class TerrainSurface : MonoBehaviour
     public Vector2 m_HorizontalDirection = new Vector2(1.0f, 0.0f);
     public Vector2 m_VerticalDirection = new Vector2(0.0f, 1.0f);
 
+    // The angle between both directions.
+    private float m_HorizontalAngle;
+
     // ------------------------------------------------------------------------
     private void Start()
     {
@@ -26,17 +30,19 @@ public class TerrainSurface : MonoBehaviour
     {
         m_Surface = collider2D as PolygonCollider2D;
         m_Surface.isTrigger = true;
+        m_HorizontalDirection = m_HorizontalDirection.normalized;
+        m_VerticalDirection = m_VerticalDirection.normalized;
+        m_HorizontalAngle = (float)Math.Sin(Vector2.Dot(m_HorizontalDirection, Vector2.right));
     }
 
     // ------------------------------------------------------------------------
-    // Calculate the resulting navigation parameters from the input.
-    // @Note: This method is called from the fixed update (physics step).
     public void Navigation(TerrainNavigationInput input, TerrainNavigationOutput output)
-    {            
-        output.m_Velocity = m_HorizontalDirection.normalized * input.m_Velocity.x + m_VerticalDirection.normalized * input.m_Velocity.y;
-        output.m_Height = input.m_Height;
+    {
+        output.m_Velocity = m_HorizontalDirection * input.m_Velocity.x + m_VerticalDirection * input.m_Velocity.y;
+        output.m_Height = (input.m_Height < float.Epsilon) ? input.m_Height : input.m_Height + m_HorizontalAngle * Vector2.Dot(output.m_Velocity, m_HorizontalDirection) * Time.fixedDeltaTime;
     }
 
+#if UNITY_EDITOR
     // ------------------------------------------------------------------------
     public void OnSceneGUI()
     {
@@ -65,10 +71,11 @@ public class TerrainSurface : MonoBehaviour
         // Display the directions.
         var position = (Vector3)centerPosition;
         UnityEditor.Handles.color = Color.green;
-        UnityEditor.Handles.DrawLine(position, position + (Vector3)m_HorizontalDirection.normalized);
+        UnityEditor.Handles.DrawLine(position, position + (Vector3)m_HorizontalDirection);
         UnityEditor.Handles.color = Color.red;
-        UnityEditor.Handles.DrawLine(position, position + (Vector3)m_VerticalDirection.normalized);
+        UnityEditor.Handles.DrawLine(position, position + (Vector3)m_VerticalDirection);
     }
+#endif
 }
 
 } // namespace Terrain
