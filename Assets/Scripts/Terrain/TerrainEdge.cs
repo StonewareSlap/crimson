@@ -24,19 +24,13 @@ public class TerrainEdge : MonoBehaviour
     }
 
     // ------------------------------------------------------------------------
-    public Color ToColor()
-    {
-        return Color.red;
-    }
-
-    // ------------------------------------------------------------------------
 #if UNITY_EDITOR
     public void OnSceneGUI()
     {
         // Display the edge.
         if (m_EdgeCollider != null)
         {
-            UnityEditor.Handles.color = ToColor();
+            UnityEditor.Handles.color = Color.red;
 
             var points = m_EdgeCollider.points;
             Vector2 pointA, pointB;
@@ -46,7 +40,7 @@ public class TerrainEdge : MonoBehaviour
                 pointB = transform.TransformPoint(points[i + 1]);
 
                 UnityEditor.Handles.DrawLine(pointA, pointB);
-                UnityEditor.Handles.Label((Vector3)(pointA + pointB) * 0.5f, i.ToString());
+                //UnityEditor.Handles.Label((Vector3)(pointA + pointB) * 0.5f, i.ToString(), UnityEditor.EditorStyles.miniLabel);
 
             }
         }

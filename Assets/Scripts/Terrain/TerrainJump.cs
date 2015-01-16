@@ -7,12 +7,10 @@ namespace Terrain {
 [RequireComponent(typeof(EdgeCollider2D))]
 public class TerrainJump : MonoBehaviour
 {
-    // The TerrainEdge used to define the jump highest section. This TerrainEdge can always be crossed
-    // on contact.
+    // The edge collider used to define the jump highest section. This TerrainEdge can always be crossed on contact.
     public EdgeCollider2D m_TopEdge;
 
-    // The TerrainEdge used to define the jump lowest section. This TerrainEdge can be crossed when
-    // the object reaches a data defined height.
+    // The edge collider used to define the jump lowest section. This TerrainEdge can be crossed when the object reaches a data defined height.
     public EdgeCollider2D m_BottomEdge;
 
     // The direction of the jump.
@@ -84,6 +82,45 @@ public class TerrainJump : MonoBehaviour
         output.m_Height = input.m_Height;
         return;
     }
+
+#if UNITY_EDITOR
+    // ------------------------------------------------------------------------
+    public void OnSceneGUI()
+    {
+        // Display the edges.
+        OnSceneGUIDrawEdge(m_TopEdge, true);
+        OnSceneGUIDrawEdge(m_BottomEdge, false);
+    }
+
+    // ------------------------------------------------------------------------
+    private void OnSceneGUIDrawEdge(EdgeCollider2D edge, bool bDrawDirections)
+    {
+        if (edge != null)
+        {
+            UnityEditor.Handles.color = Color.cyan;
+
+            var points = edge.points;
+            Vector2 pointA, pointB;
+            for (int i = 0; i < points.Length - 1; ++i)
+            {
+                pointA = transform.TransformPoint(points[i]);
+                pointB = transform.TransformPoint(points[i + 1]);
+
+                UnityEditor.Handles.DrawLine(pointA, pointB);
+                //UnityEditor.Handles.Label((Vector3)(pointA + pointB) * 0.5f, i.ToString(), UnityEditor.EditorStyles.miniLabel);
+
+                if (bDrawDirections && i == 0)
+                {
+                    Vector2 center = (pointA + pointB) * 0.5f;
+                    UnityEditor.Handles.color = Color.white;
+                    UnityEditor.Handles.DrawLine(center, center + m_Direction.normalized);
+                    UnityEditor.Handles.color = Color.black;
+                    UnityEditor.Handles.DrawLine(center, center + m_TopToBottomDirection.normalized);
+                }
+            }
+        }
+    }
+#endif
 }
 
 } // namespace Terrain

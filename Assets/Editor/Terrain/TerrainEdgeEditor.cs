@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections;
 
+// ----------------------------------------------------------------------------
 namespace Terrain
 {
     // ----------------------------------------------------------------------------
@@ -27,17 +28,6 @@ namespace Terrain
             GUILayout.Label("Terrain.TerrainEdge\n----------", EditorStyles.boldLabel);
 
             m_Object.ApplyModifiedProperties();
-        }
-
-        // ------------------------------------------------------------------------
-        public void OnSceneGUI()
-        {
-            // Display the surface informations.
-            var TerrainEdge = target as TerrainEdge;
-            if (TerrainEdge != null)
-            {
-                TerrainEdge.OnSceneGUI();
-            }
         }
     }
 

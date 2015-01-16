@@ -51,6 +51,8 @@ public class TerrainSurface : MonoBehaviour
         // Display the surface TerrainEdges.        
         if (m_Surface != null)
         {
+            UnityEditor.Handles.color = Color.yellow;          
+            
             var points = m_Surface.points;
             Vector2 pointA, pointB;
             for (int i = 0; i < points.Length; ++i)
@@ -60,9 +62,8 @@ public class TerrainSurface : MonoBehaviour
 
                 centerPosition += pointA;
 
-                UnityEditor.Handles.color = Color.green;
                 UnityEditor.Handles.DrawLine(pointA, pointB);
-                UnityEditor.Handles.Label((Vector3)(pointA + pointB) * 0.5f, i.ToString());
+                //UnityEditor.Handles.Label((Vector3)(pointA + pointB) * 0.5f, i.ToString(), UnityEditor.EditorStyles.miniLabel);
             }
 
             centerPosition = points.Length > 0 ? centerPosition / points.Length : Vector2.zero;
@@ -70,10 +71,10 @@ public class TerrainSurface : MonoBehaviour
 
         // Display the directions.
         var position = (Vector3)centerPosition;
-        UnityEditor.Handles.color = Color.green;
-        UnityEditor.Handles.DrawLine(position, position + (Vector3)m_HorizontalDirection);
-        UnityEditor.Handles.color = Color.red;
-        UnityEditor.Handles.DrawLine(position, position + (Vector3)m_VerticalDirection);
+        UnityEditor.Handles.color = Color.white;
+        UnityEditor.Handles.DrawLine(position, position + (Vector3)m_HorizontalDirection.normalized);
+        UnityEditor.Handles.color = Color.black;
+        UnityEditor.Handles.DrawLine(position, position + (Vector3)m_VerticalDirection.normalized);
     }
 #endif
 }
