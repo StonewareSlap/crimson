@@ -17,7 +17,7 @@ public class TerrainJump : MonoBehaviour
     public Vector2 m_Direction;
 
     // The direction from the top to bottom edge. It is used as the raycast direction.
-    public Vector2 m_TopToBottomDirection;
+    private Vector2 m_TopToBottomDirection;
 
     // ----------------------------------------------------------------------------
     private void Start()
@@ -29,7 +29,7 @@ public class TerrainJump : MonoBehaviour
     public void Initialize()
     {
         m_Direction = m_Direction.normalized;
-        m_TopToBottomDirection = m_TopToBottomDirection.normalized;
+        m_TopToBottomDirection = Vector2.up * -1.0f;
     }
 
     // ----------------------------------------------------------------------------

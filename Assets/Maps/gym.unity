@@ -86,7 +86,7 @@ GameObject:
   - 114: {fileID: 102421633}
   m_Layer: 9
   m_Name: Edge_2
-  m_TagString: Untagged
+  m_TagString: TerrainEdge
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -145,7 +145,7 @@ GameObject:
   - 114: {fileID: 222468463}
   m_Layer: 9
   m_Name: Edge_1
-  m_TagString: Untagged
+  m_TagString: TerrainEdge
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -298,7 +298,7 @@ GameObject:
   - 114: {fileID: 399573222}
   m_Layer: 8
   m_Name: Surface_1
-  m_TagString: Untagged
+  m_TagString: TerrainSurface
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -326,7 +326,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e52c590d10f1364f9d36e92060736c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HorizontalDirection: {x: 1, y: -.639999986}
+  m_HorizontalDirection: {x: .842271447, y: -.539053738}
   m_VerticalDirection: {x: 0, y: 1}
 --- !u!60 &399573223
 PolygonCollider2D:
@@ -339,10 +339,10 @@ PolygonCollider2D:
   m_IsTrigger: 1
   m_Poly:
     m_Paths:
-    - - {x: 3.10299802, y: .600196123}
-      - {x: 1.99958229, y: -1.1043036}
-      - {x: -1.96570253, y: 1.3878336}
-      - {x: -.795918882, y: 3.45055366}
+    - - {x: 3.07497168, y: .86644721}
+      - {x: 1.77537072, y: -1.32851517}
+      - {x: -2.02175522, y: 1.16362214}
+      - {x: -.585720658, y: 3.56265903}
 --- !u!1 &431443930
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,7 +545,7 @@ GameObject:
   - 68: {fileID: 1800175479}
   m_Layer: 9
   m_Name: Jump_1
-  m_TagString: Untagged
+  m_TagString: TerrainJump
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -576,7 +576,6 @@ MonoBehaviour:
   m_TopEdge: {fileID: 1800175480}
   m_BottomEdge: {fileID: 1800175479}
   m_Direction: {x: 1, y: 0}
-  m_TopToBottomDirection: {x: 0, y: -1}
 --- !u!68 &1800175479
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -587,8 +586,9 @@ EdgeCollider2D:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Points:
-  - {x: -3.73901367, y: -3.9962523}
-  - {x: -1.85884666, y: -1.1981442}
+  - {x: -3.69597101, y: -4.09309864}
+  - {x: -2.77740884, y: -2.6456213}
+  - {x: -1.91264999, y: -1.34879386}
 --- !u!68 &1800175480
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -599,8 +599,8 @@ EdgeCollider2D:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Points:
-  - {x: -3.70619655, y: -1.96782231}
-  - {x: -1.94127715, y: 1.07449794}
+  - {x: -3.73540568, y: -1.91605139}
+  - {x: -1.953421, y: 1.08056986}
 --- !u!1 &2129511102
 GameObject:
   m_ObjectHideFlags: 0
@@ -614,7 +614,7 @@ GameObject:
   - 68: {fileID: 2129511104}
   m_Layer: 9
   m_Name: Jump_2
-  m_TagString: Untagged
+  m_TagString: TerrainJump
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -641,7 +641,7 @@ EdgeCollider2D:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Points:
-  - {x: -1.86357927, y: -1.36357915}
+  - {x: -1.92814338, y: -1.35281849}
   - {x: 1.67840171, y: -1.34674489}
 --- !u!68 &2129511105
 EdgeCollider2D:
@@ -654,7 +654,7 @@ EdgeCollider2D:
   m_IsTrigger: 0
   m_Points:
   - {x: -1.94775069, y: 1.07739592}
-  - {x: 1.67840183, y: -1.31307626}
+  - {x: 1.70259535, y: -1.35339892}
 --- !u!114 &2129511106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -669,4 +669,3 @@ MonoBehaviour:
   m_TopEdge: {fileID: 2129511105}
   m_BottomEdge: {fileID: 2129511104}
   m_Direction: {x: 0, y: -1}
-  m_TopToBottomDirection: {x: 0, y: -1}
