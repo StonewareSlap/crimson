@@ -25,7 +25,7 @@ public class ControllerBase : MonoBehaviour
     public float m_GravityFactor = 3.0f;
    
     private float m_VerticalVelocity = 0.0f;
-    private float m_Height = 0.0f;
+    public float m_Height = 0.0f;
 
     // Collisions
     public CircleCollider2D m_NavigationCollider;
