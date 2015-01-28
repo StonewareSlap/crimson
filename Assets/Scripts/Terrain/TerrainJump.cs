@@ -33,8 +33,45 @@ public class TerrainJump : MonoBehaviour
     }
 
     // ----------------------------------------------------------------------------
+    private bool PlatformNavigation(TerrainNavigationInput input, TerrainNavigationOutput output)
+    {
+        // Check if the jump is part of a TerrainPlatform.
+        TerrainPlatform terrainPlatform = transform.parent ? transform.parent.GetComponent<TerrainPlatform>() : null;
+        if (terrainPlatform && terrainPlatform.m_TerrainJumps.Contains(this))
+        {
+            Collider2D ownerCollider = input.m_Collision.contacts[0].otherCollider;
+
+            // Check if the owner is already standing on the platform.
+            if (terrainPlatform.m_ContainedGOs.Contains(input.m_OwnerGO))
+            {
+                // Disable the collision with the jump's bottom edge.
+                Physics2D.IgnoreCollision(m_BottomEdge, ownerCollider);
+                return false;
+            }
+            else
+            {
+                // Disable the collision with the jump's top edge.
+                Physics2D.IgnoreCollision(m_TopEdge, ownerCollider);
+                return false;
+            }
+
+            output.m_Origin = input.m_Origin;
+            output.m_Velocity = input.m_Velocity;
+            output.m_Height = input.m_Height; 
+            return true;
+        }
+
+        return false;
+    }
+
+    // ----------------------------------------------------------------------------
     public void Navigation(TerrainNavigationInput input, TerrainNavigationOutput output)
     {
+        if (PlatformNavigation(input, output))
+        {
+            return;
+        }
+
         // Configure the data depending on which edge we touched.
         var raycastEdge = m_BottomEdge;
         var raycastDirection = m_TopToBottomDirection;
@@ -45,7 +82,7 @@ public class TerrainJump : MonoBehaviour
             raycastEdge = m_TopEdge;
             raycastDirection *= -1.0f;
             direction *= -1.0f;
-        }
+        }        
 
         // Check if the input velocity is in the required direction.
         if (Vector2.Dot(input.m_Velocity, direction) > 0.0f)

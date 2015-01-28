@@ -55,6 +55,8 @@ public class ControllerBase : MonoBehaviour
 
         // Cache the collision LayerMask.
         m_EdgeLayerMask = LayerMask.GetMask("TerrainEdge");
+
+        m_TerrainNavInput.m_OwnerGO = gameObject;
     }
 
     // ------------------------------------------------------------------------   
