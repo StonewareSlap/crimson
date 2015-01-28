@@ -19,6 +19,12 @@ public class TerrainJump : MonoBehaviour
     // The direction from the top to bottom edge. It is used as the raycast direction.
     private Vector2 m_TopToBottomDirection;
 
+    // The associated TerrainPlatform (optional)
+    private TerrainPlatform m_TerrainPlatform;
+
+    // TerrainEdge collision layer.
+    private static int m_EdgeLayerMask = LayerMask.GetMask("TerrainEdge");
+
     // ----------------------------------------------------------------------------
     private void Start()
     {
@@ -30,59 +36,34 @@ public class TerrainJump : MonoBehaviour
     {
         m_Direction = m_Direction.normalized;
         m_TopToBottomDirection = Vector2.up * -1.0f;
-    }
-
-    // ----------------------------------------------------------------------------
-    private bool PlatformNavigation(TerrainNavigationInput input, TerrainNavigationOutput output)
-    {
-        // Check if the jump is part of a TerrainPlatform.
-        TerrainPlatform terrainPlatform = transform.parent ? transform.parent.GetComponent<TerrainPlatform>() : null;
-        if (terrainPlatform && terrainPlatform.m_TerrainJumps.Contains(this))
-        {
-            Collider2D ownerCollider = input.m_Collision.contacts[0].otherCollider;
-
-            // Check if the owner is already standing on the platform.
-            if (terrainPlatform.m_ContainedGOs.Contains(input.m_OwnerGO))
-            {
-                // Disable the collision with the jump's bottom edge.
-                Physics2D.IgnoreCollision(m_BottomEdge, ownerCollider);
-                return false;
-            }
-            else
-            {
-                // Disable the collision with the jump's top edge.
-                Physics2D.IgnoreCollision(m_TopEdge, ownerCollider);
-                return false;
-            }
-
-            output.m_Origin = input.m_Origin;
-            output.m_Velocity = input.m_Velocity;
-            output.m_Height = input.m_Height; 
-            return true;
-        }
-
-        return false;
+        
+        // Cache the associated TerrainPlatform.
+        m_TerrainPlatform = transform.parent ? transform.parent.GetComponent<TerrainPlatform>() : null;
+        if (m_TerrainPlatform && !m_TerrainPlatform.m_TerrainJumps.Contains(this)) m_TerrainPlatform = null;
     }
 
     // ----------------------------------------------------------------------------
     public void Navigation(TerrainNavigationInput input, TerrainNavigationOutput output)
     {
-        if (PlatformNavigation(input, output))
-        {
-            return;
-        }
-
         // Configure the data depending on which edge we touched.
+        var bCollidedWithBottomEdge = false;
         var raycastEdge = m_BottomEdge;
         var raycastDirection = m_TopToBottomDirection;
         var direction = m_Direction;
         
         if (input.m_Collision.collider == m_BottomEdge)
         {
+            bCollidedWithBottomEdge = true;
             raycastEdge = m_TopEdge;
             raycastDirection *= -1.0f;
             direction *= -1.0f;
-        }        
+        }
+
+        // Update the TerrainPlatform's collision (optional).
+        if (m_TerrainPlatform && !m_TerrainPlatform.UpdateCollision(input, bCollidedWithBottomEdge, false))
+        {
+            return;
+        }
 
         // Check if the input velocity is in the required direction.
         if (Vector2.Dot(input.m_Velocity, direction) > 0.0f)
@@ -96,28 +77,49 @@ public class TerrainJump : MonoBehaviour
                 {
                     var heightDelta = Vector2.Dot(hit.point - contactPoint, raycastDirection);
 
-                    if (raycastEdge == m_TopEdge)
+                    // Make sure we have reached the required height for this case.
+                    if (bCollidedWithBottomEdge && input.m_Height < heightDelta)
                     {
-                        // Make sure we have reached the required height for this case
-                        if (input.m_Height < heightDelta)
-                        {
-                            break;
-                        }
+                        break;
                     }
 
+                    // Prevent the jump if the destination is not collision free (skip current jump collision).
+                    var destination = hit.point + direction * input.m_Radius;
+                    var destinationHits = Physics2D.OverlapCircleAll(destination, input.m_Radius, m_EdgeLayerMask);
+                    foreach (var destinationHit in destinationHits)
+                    {
+                        if (destinationHit == m_TopEdge || destinationHit == m_BottomEdge)
+                        {
+                            continue;
+                        }
+
+                        Prevent(input, output);
+                        break;
+                    }
+
+                    // Success.                   
                     output.m_Origin = hit.point + direction * input.m_Radius;
                     output.m_Velocity = input.m_Velocity;
                     output.m_Height = (raycastEdge == m_TopEdge) ? input.m_Height - heightDelta : input.m_Height + heightDelta;
+
+                    // Update the TerrainPlatform's collision (optional transition).
+                    if (m_TerrainPlatform) m_TerrainPlatform.UpdateCollision(input, bCollidedWithBottomEdge, true);
+
                     return;
                 }
             }
-        }        
+        }
 
-        // Prevent the jump.
+        Prevent(input, output);
+        return;
+    }
+
+    // ------------------------------------------------------------------------
+    private void Prevent(TerrainNavigationInput input, TerrainNavigationOutput output)
+    {
         output.m_Origin = input.m_Origin;
         output.m_Velocity = input.m_Velocity;
         output.m_Height = input.m_Height;
-        return;
     }
 
 #if UNITY_EDITOR

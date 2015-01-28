@@ -29,7 +29,6 @@ public class ControllerBase : MonoBehaviour
 
     // Collisions
     public CircleCollider2D m_NavigationCollider;
-    private int m_EdgeLayerMask;
 
     // Terrain
     public Terrain.TerrainSurface m_DefaultTerrainSurface;
@@ -52,9 +51,6 @@ public class ControllerBase : MonoBehaviour
     {
         // Add the default TerrainSurface. This surface is used when the controller is not standing on another one.
         m_TerrainSurfaces.Add(-1, m_DefaultTerrainSurface.gameObject.GetComponent<Terrain.TerrainSurface>());
-
-        // Cache the collision LayerMask.
-        m_EdgeLayerMask = LayerMask.GetMask("TerrainEdge");
 
         m_TerrainNavInput.m_OwnerGO = gameObject;
     }
@@ -136,20 +132,7 @@ public class ControllerBase : MonoBehaviour
 
             m_TerrainJump.Navigation(m_TerrainNavInput, m_TerrainNavOutput);
 
-            // Prevent the jump if the destination is not collision free (expect for the current jump one).
-            var hits = Physics2D.OverlapCircleAll(m_TerrainNavOutput.m_Origin, m_NavigationCollider.radius, m_EdgeLayerMask);            
-            foreach (var hit in hits)
-            {
-                if (hit == m_TerrainJump.m_TopEdge || hit == m_TerrainJump.m_BottomEdge)
-                {
-                    continue;
-                }
-                
-                m_TerrainNavOutput.m_Height = m_TerrainNavInput.m_Height;
-                m_TerrainNavOutput.m_Origin = m_TerrainNavInput.m_Origin;
-            }
-
-            // Release the references since the TerrainJump was handled.
+            // Release the references since the TerrainJump was handled.          
             m_TerrainJump = null;
             m_TerrainJumpCollision = null;
             m_TerrainNavInput.m_Collision = null;
