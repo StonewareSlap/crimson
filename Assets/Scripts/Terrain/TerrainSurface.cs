@@ -32,7 +32,7 @@ public class TerrainSurface : MonoBehaviour
         m_Surface.isTrigger = true;
         m_HorizontalDirection = m_HorizontalDirection.normalized;
         m_VerticalDirection = m_VerticalDirection.normalized;
-        m_HorizontalAngle = (float)Math.Sin(Vector2.Dot(m_HorizontalDirection, Vector2.right));
+        m_HorizontalAngle = (float)Math.Sin(Math.Acos(Vector2.Dot(m_HorizontalDirection, Vector2.right)));
     }
 
     // ------------------------------------------------------------------------

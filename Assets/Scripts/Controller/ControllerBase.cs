@@ -27,7 +27,8 @@ public class ControllerBase : MonoBehaviour
     private float m_VerticalVelocity = 0.0f;
     public float m_Height = 0.0f;
 
-    // Collisions
+    // Collision
+    public Rigidbody2D m_RigidBody;
     public CircleCollider2D m_NavigationCollider;
 
     // Terrain
@@ -50,6 +51,7 @@ public class ControllerBase : MonoBehaviour
     public void Initialize()
     {
         // Add the default TerrainSurface. This surface is used when the controller is not standing on another one.
+        m_DefaultTerrainSurface.Initialize();
         m_TerrainSurfaces.Add(-1, m_DefaultTerrainSurface.gameObject.GetComponent<Terrain.TerrainSurface>());
 
         m_TerrainNavInput.m_OwnerGO = gameObject;
@@ -87,23 +89,13 @@ public class ControllerBase : MonoBehaviour
         {
             m_Height = m_VerticalVelocity = 0.0f;
         }
-
-        // ...
-        var components = GetComponentsInChildren<Transform>();
-        foreach (var comp in components)
-        {
-            if (comp != transform)
-            {
-                comp.position = transform.position + Vector3.up * m_Height;
-            }
-        }
     }
 
     // ------------------------------------------------------------------------   
     private void FixedUpdate()
     {
         // Initialize the navigation structs.
-        m_TerrainNavInput.m_Origin = m_TerrainNavOutput.m_Origin = rigidbody2D.position;
+        m_TerrainNavInput.m_Origin = m_TerrainNavOutput.m_Origin = m_RigidBody.position;
         m_TerrainNavInput.m_Velocity = m_TerrainNavOutput.m_Velocity = m_Direction * m_MaxVelocity;
         m_TerrainNavInput.m_Height = m_TerrainNavOutput.m_Height = m_Height;
         m_TerrainNavInput.m_Radius = m_NavigationCollider.radius;
@@ -142,8 +134,8 @@ public class ControllerBase : MonoBehaviour
         m_VerticalVelocity -= Physics2D.gravity.magnitude * m_GravityFactor * Time.fixedDeltaTime;
 
         // Final Values
-        rigidbody2D.position = m_TerrainNavOutput.m_Origin;
-        rigidbody2D.velocity = m_TerrainNavOutput.m_Velocity;
+        m_RigidBody.position = m_TerrainNavOutput.m_Origin;
+        m_RigidBody.velocity = m_TerrainNavOutput.m_Velocity;
         m_Height = m_TerrainNavOutput.m_Height;
     }
 

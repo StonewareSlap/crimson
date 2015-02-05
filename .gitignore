@@ -40,3 +40,7 @@ crimon_x64_Data/PlayerConnectionConfigFile
 crimon_x64_Data/Resources/unity default resources
 crimon_x64_Data/Resources/unity_builtin_extra
 crimon_x64_Data/sharedassets0.assets
+Assets/Assembly-CSharp-Editor.pidb.meta
+Assets/Assembly-CSharp.pidb.meta
+Assets/UnityVS/Editor/UnityVS.VersionSpecific.dll
+Assets/UnityVS/Editor/UnityVS.VersionSpecific.dll

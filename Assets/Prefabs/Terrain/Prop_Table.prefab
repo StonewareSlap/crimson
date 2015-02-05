@@ -11,7 +11,7 @@ GameObject:
   - 114: {fileID: 11400000}
   - 68: {fileID: 6800002}
   - 68: {fileID: 6800000}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Jump_4
   m_TagString: TerrainJump
   m_Icon: {fileID: 0}
@@ -29,7 +29,7 @@ GameObject:
   - 114: {fileID: 11400002}
   - 68: {fileID: 6800006}
   - 68: {fileID: 6800004}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Jump_3
   m_TagString: TerrainJump
   m_Icon: {fileID: 0}
@@ -63,7 +63,7 @@ GameObject:
   - 114: {fileID: 11400006}
   - 68: {fileID: 6800010}
   - 68: {fileID: 6800008}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Jump_2
   m_TagString: TerrainJump
   m_Icon: {fileID: 0}
@@ -81,7 +81,7 @@ GameObject:
   - 114: {fileID: 11400008}
   - 68: {fileID: 6800014}
   - 68: {fileID: 6800012}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Jump_1
   m_TagString: TerrainJump
   m_Icon: {fileID: 0}
