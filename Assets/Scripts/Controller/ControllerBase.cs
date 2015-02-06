@@ -6,16 +6,6 @@ namespace Controller {
 // ----------------------------------------------------------------------------
 public class ControllerBase : MonoBehaviour
 {
-    // Input (Temporary code to move around)
-    public enum EDirection
-    {
-        None = 0,
-        Up = 0x01,
-        Down = 0x02,
-        Left = 0x04,
-        Right = 0x08,
-    }
-    private int m_InputDirection;
     private Vector2 m_Direction;
     private Vector2 m_DirectionFactor = new Vector2(1.0f, 0.75f);
     private bool m_bJumpRequest = false;
@@ -61,23 +51,11 @@ public class ControllerBase : MonoBehaviour
     void Update()
     {
         // Direction request
-        m_InputDirection = 0;
-        if (Input.GetKey(KeyCode.UpArrow)) m_InputDirection |= (int)EDirection.Up;
-        if (Input.GetKey(KeyCode.DownArrow)) m_InputDirection |= (int)EDirection.Down;
-        if (Input.GetKey(KeyCode.LeftArrow)) m_InputDirection |= (int)EDirection.Left;
-        if (Input.GetKey(KeyCode.RightArrow)) m_InputDirection |= (int)EDirection.Right;
-
-        m_Direction = Vector2.zero;
-        if ((m_InputDirection & (int)EDirection.Up) == 0) { m_Direction.y -= 1.0f; }
-        if ((m_InputDirection & (int)EDirection.Down) == 0) { m_Direction.y += 1.0f; }
-        if ((m_InputDirection & (int)EDirection.Left) == 0) { m_Direction.x += 1.0f; }
-        if ((m_InputDirection & (int)EDirection.Right) == 0) { m_Direction.x -= 1.0f; }
-        m_Direction = m_Direction.normalized;
-        m_Direction.x *= m_DirectionFactor.x;
-        m_Direction.y *= m_DirectionFactor.y;
+        m_Direction.x = Input.GetAxis("Horizontal") * m_DirectionFactor.x;
+        m_Direction.y = Input.GetAxis("Vertical") * m_DirectionFactor.y;
 
         // Jump request
-        m_bJumpRequest = Input.GetKeyDown(KeyCode.Space);
+        m_bJumpRequest = Input.GetButton("Jump");
         if (m_bJumpRequest && m_Height < float.Epsilon)
         {
             m_VerticalVelocity = 12.5f;

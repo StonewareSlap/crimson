@@ -13,7 +13,7 @@ public class TerrainViewerWindow : EditorWindow
     private static string m_TerrainJumpTag = "TerrainJump";
 
     // ----------------------------------------------------------------------------
-    [MenuItem("Crimson/Terrain")]
+    [MenuItem("Crimson/Terrain Viewer")]
     public static void Init()
     {
         TerrainViewerWindow window = GetWindow<TerrainViewerWindow>();
