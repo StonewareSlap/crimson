@@ -1,25 +1,79 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Sprite {
 
-    // ------------------------------------------------------------------------   
-    public class SpriteTransform : MonoBehaviour
+// ------------------------------------------------------------------------   
+public class SpriteTransform : MonoBehaviour
+{
+    // The controller responsible for this sprite movement in the world.
+    public Controller.ControllerBase m_Controller;
+
+    // Initial sorting order defined in the data. 
+    // We use this as an offset applied to the computed sorting order to preserve the data intention.
+    private Dictionary<SpriteRenderer, int> m_InitialSortingOrder = new Dictionary<SpriteRenderer,int>();
+
+    // Values used to compute the actual sprite sorting order.
+    private float m_MaxY = 100.0f;
+    private float m_MinY = -100.0f;        
+    private float m_SortingOrderMin = short.MinValue + 200;
+    private float m_SortingOrderMax = short.MaxValue - 200;
+    private float m_Frequency = 0.1f;
+
+    // ------------------------------------------------------------------------     
+    private void Start()
     {
-        // The controller responsible for this sprite movement in the world.
-        public Controller.ControllerBase m_Controller;
-
-        private Vector3 m_LocalPosition = new Vector3(0.0f, 0.0f, 0.0f);
-
-        // ------------------------------------------------------------------------   
-        private void Update()
+        Initialize();
+        StartCoroutine(AutoSortingCoroutine());
+    }
+    
+    // ------------------------------------------------------------------------     
+    private void Initialize()
+    {
+        foreach (SpriteRenderer spriteRenderer in GetComponentsInChildren<SpriteRenderer>())
         {
-            if (m_Controller != null)
-            {
-                m_LocalPosition.Set(0.0f, m_Controller.m_Height, transform.parent.position.y);
-                transform.localPosition = m_LocalPosition;
-            }
+            m_InitialSortingOrder.Add(spriteRenderer, spriteRenderer.sortingOrder);
         }
     }
 
+    // ------------------------------------------------------------------------     
+    public void Update()
+    {
+        if (m_Controller != null)
+        {
+            transform.localPosition = Vector3.up * m_Controller.m_Height;
+        }
+    }
+
+    // ------------------------------------------------------------------------     
+    private IEnumerator AutoSortingCoroutine()
+    {
+        while (true)
+        {
+            AutoSort();
+            yield return new WaitForSeconds(m_Frequency);
+        }
+    }
+
+    // ------------------------------------------------------------------------     
+    private void AutoSort()
+    {
+        int sortingOffset = GetSortingOffset(transform.position.y);
+        foreach (SpriteRenderer spriteRenderer in m_InitialSortingOrder.Keys)
+        {
+            spriteRenderer.sortingOrder = m_InitialSortingOrder[spriteRenderer] + sortingOffset;
+        }
+    }
+
+    // ------------------------------------------------------------------------     
+    private int GetSortingOffset(float currentY)
+    {
+        float clampedY = Mathf.Clamp(currentY, m_MinY, m_MaxY);
+        float t = (clampedY - m_MinY) / (m_MaxY - m_MinY);
+        float sortingOffset = (t * (m_SortingOrderMax - m_SortingOrderMin)) + m_SortingOrderMin;        
+        return Mathf.RoundToInt(-sortingOffset);
+    }
+}
+    
 } // namespace Sprite
