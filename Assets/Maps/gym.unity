@@ -654,7 +654,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_TargetPositionOffset: {x: 0, y: 1, z: 0}
-  m_SmoothDampTime: .5
+  m_SmoothDampTime: .150000006
 --- !u!1001 &434039406
 Prefab:
   m_ObjectHideFlags: 0

@@ -72,6 +72,8 @@ public class ControllerBase : MonoBehaviour
     // ------------------------------------------------------------------------   
     private void FixedUpdate()
     {
+        UpdateInterpolationMode();
+
         // Initialize the navigation structs.
         m_TerrainNavInput.m_Origin = m_TerrainNavOutput.m_Origin = m_RigidBody.position;
         m_TerrainNavInput.m_Velocity = m_TerrainNavOutput.m_Velocity = m_Direction * m_MaxVelocity;
@@ -115,6 +117,17 @@ public class ControllerBase : MonoBehaviour
         m_RigidBody.position = m_TerrainNavOutput.m_Origin;
         m_RigidBody.velocity = m_TerrainNavOutput.m_Velocity;
         m_Height = m_TerrainNavOutput.m_Height;
+    }
+
+    // ------------------------------------------------------------------------   
+    void UpdateInterpolationMode()
+    {
+        if (m_RigidBody)
+        {
+            // When we are jumping, we disable the rigid body interpolation since we will teleport it.
+            // We might do this for other cases in the future. In fact, we have to do this every time we "teleport" the rigid body.
+            m_RigidBody.interpolation = m_TerrainJump ? RigidbodyInterpolation2D.None : RigidbodyInterpolation2D.Interpolate;
+        }
     }
 
     // ------------------------------------------------------------------------   
