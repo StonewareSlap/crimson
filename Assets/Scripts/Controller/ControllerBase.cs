@@ -32,6 +32,23 @@ public class ControllerBase : MonoBehaviour
     private Terrain.TerrainNavigationOutput m_TerrainNavOutput = new Terrain.TerrainNavigationOutput();
 
     // ------------------------------------------------------------------------   
+    public float CurrentVelocity
+    {
+        get
+        {
+            return m_RigidBody.velocity.magnitude;
+        }
+    }
+
+    public bool MovingLeft
+    {
+        get
+        {
+            return m_RigidBody.velocity.x < float.Epsilon;
+        }
+    }
+
+    // ------------------------------------------------------------------------   
     private void Start()
     {
         Initialize();
