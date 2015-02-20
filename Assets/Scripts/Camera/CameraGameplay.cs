@@ -19,11 +19,13 @@ public class CameraGameplay : MonoBehaviour
     // The SmoothDamp velocity.
     private Vector3 m_SmoothDampVelocity = Vector3.zero;
 
+    // ----------------------------------------------------------------------------
     private void Start()
     {
         Initialize();
     }
 
+    // ----------------------------------------------------------------------------
     public void Initialize()
     {
         // First, we want to cache the objects we want to look at using the camera.
@@ -34,6 +36,7 @@ public class CameraGameplay : MonoBehaviour
         }
     }
 
+    // ----------------------------------------------------------------------------
     void Update()
     {
         // For now only do a simple smooth damped the GOs.

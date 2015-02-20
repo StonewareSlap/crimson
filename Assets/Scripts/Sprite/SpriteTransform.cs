@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Controller;
 
 namespace Sprite {
 
@@ -20,6 +21,17 @@ public class SpriteTransform : MonoBehaviour
     private float m_SortingOrderMin = short.MinValue + 200;
     private float m_SortingOrderMax = short.MaxValue - 200;
     private float m_Frequency = 0.1f;
+
+    // Values used for the sprite orientation.
+    public float m_OrientationTime = 0.1f;
+    private Vector2 m_OrientationVelocity = Vector3.zero;
+    private Vector2 m_Orientation = Vector2.zero;
+    private Vector2 m_LeftOrientation = Vector2.zero;
+    private Vector2 m_RightOrientation = new Vector2(180.0f, 0.0f);
+
+    // Values used for the shadow scale.
+    // @Todo: Scale with height...
+    public GameObject m_ShadowSprite;
 
     // ------------------------------------------------------------------------     
     private void Start()
@@ -42,7 +54,13 @@ public class SpriteTransform : MonoBehaviour
     {
         if (m_Controller != null)
         {
+            // Jump position
             transform.localPosition = Vector3.up * m_Controller.m_Height;
+
+            // Orientation
+            Vector2 targetOrientation = (m_Controller.m_Orientation == ControllerBase.EOrientation.Left) ? m_LeftOrientation : m_RightOrientation;
+            m_Orientation = Vector2.SmoothDamp(m_Orientation, targetOrientation, ref m_OrientationVelocity, m_OrientationTime);
+            transform.localRotation = Quaternion.Euler(0.0f, m_Orientation.x, 0.0f);            
         }
     }
 

@@ -631,6 +631,7 @@ MonoBehaviour:
   m_MaxVelocity: 4.5
   m_GravityFactor: 3
   m_Height: 0
+  m_Orientation: 0
   m_RigidBody: {fileID: 5094592}
   m_NavigationCollider: {fileID: 5856150}
   m_DefaultTerrainSurface: {fileID: 11475700, guid: 28ccaddc2373be44089dda9d286d951a,
@@ -647,6 +648,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Controller: {fileID: 11456150}
+  m_OrientationTime: .100000001
+  m_ShadowSprite: {fileID: 176758}
 --- !u!212 &21209388
 SpriteRenderer:
   m_ObjectHideFlags: 1

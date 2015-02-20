@@ -6,6 +6,7 @@ namespace Controller {
 // ----------------------------------------------------------------------------
 public class ControllerBase : MonoBehaviour
 {
+    // Controls
     private Vector2 m_Direction;
     private Vector2 m_DirectionFactor = new Vector2(1.0f, 0.75f);
     private bool m_bJumpRequest = false;
@@ -13,9 +14,20 @@ public class ControllerBase : MonoBehaviour
     // Properties
     public float m_MaxVelocity = 4.5f;
     public float m_GravityFactor = 3.0f;
-   
-    private float m_VerticalVelocity = 0.0f;
+    
+    // Jump
     public float m_Height = 0.0f;
+    private float m_VerticalVelocity = 0.0f;
+
+    // Orientation
+    public enum EOrientation
+    {
+        Left,
+        Right,
+    };
+
+    public EOrientation m_Orientation;
+    private bool m_bOrientationLocked = false;
 
     // Collision
     public Rigidbody2D m_RigidBody;
@@ -32,19 +44,11 @@ public class ControllerBase : MonoBehaviour
     private Terrain.TerrainNavigationOutput m_TerrainNavOutput = new Terrain.TerrainNavigationOutput();
 
     // ------------------------------------------------------------------------   
-    public float CurrentVelocity
+    public float Velocity
     {
         get
         {
             return m_RigidBody.velocity.magnitude;
-        }
-    }
-
-    public bool MovingLeft
-    {
-        get
-        {
-            return m_RigidBody.velocity.x < float.Epsilon;
         }
     }
 
@@ -89,8 +93,9 @@ public class ControllerBase : MonoBehaviour
     // ------------------------------------------------------------------------   
     private void FixedUpdate()
     {
+        UpdateOrientation();
         UpdateInterpolationMode();
-
+        
         // Initialize the navigation structs.
         m_TerrainNavInput.m_Origin = m_TerrainNavOutput.m_Origin = m_RigidBody.position;
         m_TerrainNavInput.m_Velocity = m_TerrainNavOutput.m_Velocity = m_Direction * m_MaxVelocity;
@@ -144,6 +149,21 @@ public class ControllerBase : MonoBehaviour
             // When we are jumping, we disable the rigid body interpolation since we will teleport it.
             // We might do this for other cases in the future. In fact, we have to do this every time we "teleport" the rigid body.
             m_RigidBody.interpolation = m_TerrainJump ? RigidbodyInterpolation2D.None : RigidbodyInterpolation2D.Interpolate;
+        }
+    }
+
+    // ------------------------------------------------------------------------   
+    void UpdateOrientation()
+    {
+        if (!m_bOrientationLocked)
+        {
+            if (Mathf.Abs(m_Direction.x) > float.Epsilon)
+            {
+                // The orientation is directly linked to the player input. 
+                // This way, we are really responsive to the player intention.
+                // @Todo: Investigate linking it to the velocity, not sure...
+                m_Orientation = m_Direction.x > float.Epsilon ? EOrientation.Right : EOrientation.Left;
+            }
         }
     }
 
